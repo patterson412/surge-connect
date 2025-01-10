@@ -1,7 +1,9 @@
-import { useRouter } from "next/router";
+"use client";
+import { useParams } from 'next/navigation';
 
-export default function profile() {
-    const router = useRouter();
-    const username = router.query.username;
+export default function Profile() {
+    const params = useParams();
+    const username = params.username;
+    console.log(username);
     return null;
 }

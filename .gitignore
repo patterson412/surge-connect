@@ -31,3 +31,6 @@ frontend/.next
 # IDE
 .idea/
 .vscode/
+
+# MacOs files
+.DS_Store

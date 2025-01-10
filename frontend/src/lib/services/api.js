@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base axios instance with shared configuration
 const api = axios.create({
-    baseURL: process.env.API_URL,
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true
 });
 
@@ -125,18 +125,22 @@ export const getComments = async (postId) => {
     }
 }
 
-export const login = async (email, password) => {
+export const login = async (username, password) => {
     try {
-        const response = await api.post('/api/auth/login', { email, password });
+        const response = await api.post('/api/auth/login', { username, password });
         return response.data;
     } catch (error) {
         throw error;
     }
 };
 
-export const register = async (username, password) => {
+export const register = async (formData) => {
     try {
-        const response = await api.post('/api/auth/register', { username, password });
+        const response = await api.post('/api/auth/register', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     } catch (error) {
         throw error;

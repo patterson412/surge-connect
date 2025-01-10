@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { X } from "lucide-react";
+import Link from "next/link";
+import { useTheme } from 'next-themes';
+
 import { CoolMode } from "./ui/cool-mode";
 import Particles from "./ui/particles";
-
-
 import {
     Card,
     CardContent,
@@ -14,26 +16,27 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { Label } from "./ui/label";
 import { BorderBeam } from "./ui/border-beam";
 import { useToast } from "@/hooks/use-toast";
 import { register } from "@/lib/services/api";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/lib/hooks";
 
-
 export default function Register() {
-
     const router = useRouter();
     const { toast } = useToast();
     const [showContent, setShowContent] = useState(false);
     const user = useAppSelector((state) => state.user.user);
+    const { theme } = useTheme();
 
     const [password, setPassword] = useState("");
     const [error, setError] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     useEffect(() => {
         if (user) {
@@ -41,21 +44,62 @@ export default function Register() {
         } else {
             setShowContent(true);
         }
-    });
+    }, [user, router]);
+
+    // Cleanup object URL when component unmounts or preview changes
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                toast({
+                    title: "File too large",
+                    description: "Please select an image under 5MB",
+                    variant: "destructive"
+                });
+                return;
+            }
+            setSelectedFile(file);
+            const objectUrl = URL.createObjectURL(file);
+            setPreviewUrl(objectUrl);
+        }
+    };
+
+    const removeImage = () => {
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        const fileInput = document.getElementById('profilePic');
+        if (fileInput) fileInput.value = '';
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        const username = event.target.username.value;
-        const password = event.target.password.value;
-
+        const formData = new FormData();
+        formData.append('username', event.target.username.value);
+        formData.append('password', event.target.password.value);
+        formData.append('email', event.target.email.value);
+        formData.append('firstName', event.target.firstName.value);
+        formData.append('lastName', event.target.lastName.value);
+        if (selectedFile) {
+            formData.append('file', selectedFile);
+        }
 
         try {
-            const result = await register(username, password);
-            console.log(result.message);
+            const result = await register(formData);
             toast({
-                title: "Registration Successfull",
-                description: result.message || 'An error occurred',
+                title: "Registration Successful",
+                description: result.message || 'Registration complete!',
             });
             router.push("/login");
         } catch (error) {
@@ -65,36 +109,31 @@ export default function Register() {
                 description: error.message
             });
         }
+    };
 
-    }
-
-    const handleChange = (event) => {
+    const handlePasswordChange = (event) => {
         if (event.target.value.trim() !== password) {
             setError(true);
         } else {
             setError(false);
         }
-    }
+    };
 
     if (!showContent) {
-
         return null;
     }
 
-
     return (
-        <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-
+        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden p-4">
             <Particles
                 className="absolute inset-0"
                 quantity={300}
                 ease={80}
-                color={color}
+                color={theme === "dark" ? "#ffffff" : "#000000"}
                 refresh={true}
             />
 
-
-            <Card className="w-4/5 lg:w-3/5 h-3/5 relative flex flex-col justify-between shadow-[0_0_30px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_0_30px_5px_rgba(255,255,255,0.1)] overflow-hidden"> {/* using custom shadows for a more soft spread out */}
+            <Card className="w-4/5 lg:w-3/5 max-h-[90vh] relative flex flex-col shadow-[0_0_30px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_0_30px_5px_rgba(255,255,255,0.1)]">
                 <div className="flex w-full justify-center pt-4">
                     <Image
                         src="/images/surge-logo.jpeg"
@@ -105,45 +144,112 @@ export default function Register() {
                     />
                 </div>
 
-                <CardHeader>
-                    <CardTitle>Surge Connect Register</CardTitle>
-                    <CardDescription>Enter Your credentials</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form id="registerForm" onSubmit={handleSubmit}>
-                        <div className="grid w-full items-center gap-4">
-                            <div>
-                                <label htmlFor="username">Username</label>
-                                <Input id="username" placeholder="username" required />
-                            </div>
-                            <div>
-                                <label htmlFor="password">Password</label>
-                                <Input id="password" placeholder="password" required onChange={(event) => setPassword(event.target.value.trim())} />
-                            </div>
-                            <div>
-                                <label htmlFor="confirmPassword">Confirm Password</label>
-                                <Input id="confirmPassword" placeholder="confirm password" required onChange={handleChange} />
-                            </div>
-                            <span className={cn("text-red-500", {
-                                "hidden": !error
-                            })}>Passwords do no match!</span>
-                        </div>
-                    </form>
+                <div className="flex-1 overflow-y-auto scrollbar-hide">
+                    <CardHeader>
+                        <CardTitle>Surge Connect Register</CardTitle>
+                        <CardDescription>Enter Your credentials</CardDescription>
+                    </CardHeader>
 
-                </CardContent>
-                <CardFooter className="relative flex justify-between">
+                    <CardContent>
+                        <form id="registerForm" onSubmit={handleSubmit}>
+                            <div className="grid w-full items-center gap-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="firstName">First Name</Label>
+                                        <Input id="firstName" placeholder="First Name" required />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="lastName">Last Name</Label>
+                                        <Input id="lastName" placeholder="Last Name" required />
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input id="email" type="email" placeholder="Email" required />
+                                </div>
+                                <div>
+                                    <Label htmlFor="username">Username</Label>
+                                    <Input id="username" placeholder="Username" required />
+                                </div>
+                                <div>
+                                    <Label htmlFor="password">Password</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="Password"
+                                        required
+                                        onChange={(event) => setPassword(event.target.value.trim())}
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                    <Input
+                                        id="confirmPassword"
+                                        type="password"
+                                        placeholder="Confirm password"
+                                        required
+                                        onChange={handlePasswordChange}
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="profilePic">Profile Picture (Optional)</Label>
+                                    <div className="space-y-4">
+                                        <Input
+                                            id="profilePic"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                            className="cursor-pointer"
+                                        />
+                                        {previewUrl && (
+                                            <div className="relative w-24 h-24 mx-auto">
+                                                <div className="relative w-24 h-24 rounded-full overflow-hidden">
+                                                    <Image
+                                                        src={previewUrl}
+                                                        alt="Profile preview"
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={removeImage}
+                                                    className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        )}
+                                        <div className="text-sm text-muted-foreground">
+                                            Recommended: Square image, max 5MB
+                                        </div>
+                                    </div>
+                                </div>
+                                <span className={cn("text-red-500", {
+                                    "hidden": !error
+                                })}>Passwords do not match!</span>
+                            </div>
+                        </form>
+                    </CardContent>
+                </div>
+
+                <CardFooter className="relative flex justify-between pt-4 border-t">
                     <Link href={'/login'}>Login</Link>
                     <CoolMode>
-                        <Button type="submit" form="registerForm" disabled={error} className={cn({
-                            "opacity-50 cursor-not-allowed": error
-                        })}>submit</Button>
+                        <Button
+                            type="submit"
+                            form="registerForm"
+                            disabled={error}
+                            className={cn({
+                                "opacity-50 cursor-not-allowed": error
+                            })}
+                        >
+                            Submit
+                        </Button>
                     </CoolMode>
-
                 </CardFooter>
                 <BorderBeam />
             </Card>
-
         </div>
-
     );
 }

@@ -1,5 +1,5 @@
 import HomeStructure from "@/components/HomeStructure";
 
-export default function home() {
+export default function HomeFeed() {
     return <HomeStructure />
 }

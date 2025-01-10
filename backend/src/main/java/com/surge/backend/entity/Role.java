@@ -3,7 +3,7 @@ package com.surge.backend.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "role")
+@Table(name = "roles")
 public class Role {
     @EmbeddedId
     private RoleId id;
