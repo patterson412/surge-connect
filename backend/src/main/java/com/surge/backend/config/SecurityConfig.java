@@ -41,6 +41,12 @@ public class SecurityConfig {
                                 // Public endpoints - Auth Controller
                                 .requestMatchers("/api/auth/**").permitAll()
 
+                                .requestMatchers(HttpMethod.POST, "/api/posts/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.GET, "/api/posts/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("USER")
+
+
 
 
                                 // Have to add any other routes

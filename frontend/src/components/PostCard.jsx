@@ -8,8 +8,10 @@ import { toggleLike, toggleSave, } from "@/lib/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch } from "../lib/hooks"
 import { clearUser } from "../../store/slices/userSlice";
+import CommentDialog from "./CommentDialog";
+import { Separator } from "./ui/separator";
 
-export default function PostCard({ postId, username = "undefined", likeCount = 0, img, commentCount = 0, isLiked = false, isSaved = false, caption, date }) {
+export default function PostCard({ postId, username = "undefined", likeCount, img, commentCount, isLiked = false, isSaved = false, caption, date }) {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const { toast } = useToast();
@@ -94,6 +96,9 @@ export default function PostCard({ postId, username = "undefined", likeCount = 0
                 commentCount={updatedCommentCount}
                 onCommentAdded={setUpdatedCommentCount}
             />
+
+            <Separator />
+
         </div>
     );
 }

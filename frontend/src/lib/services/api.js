@@ -104,10 +104,10 @@ export const toggleLike = async (postId) => {
     }
 };
 
-export const addComment = async (postId, content, replyTo) => {
+export const addComment = async (postId, comment, replyTo) => {
     try {
         const response = await api.post(`/api/posts/comments/add/${postId}`, {
-            content,
+            comment,
             replyTo
         });
         return response.data;
