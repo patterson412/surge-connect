@@ -44,8 +44,8 @@ const CommentsContent = ({
     handleSubmitComment,
     isSubmitting
 }) => (
-    <div className="flex flex-col h-full">
-        <div className="flex-1 p-4 overflow-y-auto">
+    <div className="flex flex-col max-h-[470px] max-w-[470px]">
+        <div className="flex-1 p-4 overflow-scroll scrollbar-hide">
             {comments.length > 0 ? (
                 comments.map((commentItem) => (
                     <Comment

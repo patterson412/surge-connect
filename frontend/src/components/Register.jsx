@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { register } from "@/lib/services/api";
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/lib/hooks";
+import {italic} from "next/dist/lib/picocolors";
 
 export default function Register() {
     const router = useRouter();
@@ -37,6 +38,8 @@ export default function Register() {
     const [error, setError] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -83,6 +86,8 @@ export default function Register() {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        setIsSubmitting(true);
+
         const formData = new FormData();
         formData.append('username', event.target.username.value);
         formData.append('password', event.target.password.value);
@@ -106,6 +111,8 @@ export default function Register() {
                 title: "Registration Error",
                 description: error.message
             });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -119,6 +126,15 @@ export default function Register() {
 
     if (!showContent) {
         return null;
+    }
+
+    if (isSubmitting) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <p>Registering User...</p>
+                <p className="italic">Thank you for your patience, finishing up and routing to login page...</p>
+            </div>
+        );
     }
 
     return (
