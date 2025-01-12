@@ -37,6 +37,12 @@ public class PostController {
         ));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCaption(@PathVariable Long id, @RequestBody Map<String, String> request){
+        Post updatedPost = postService.updateCaption(id, request.get("caption"));
+        return ResponseEntity.ok(updatedPost);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id) {
         postService.deletePost(id);
@@ -47,7 +53,7 @@ public class PostController {
 
     @GetMapping("/comments/all/{postId}")
     public ResponseEntity<?> getComments(@PathVariable Long postId) {
-        List<Map<String, Object>> comments = postService.getAllCommentsForPost(postId);
+        Map<String, Object> comments = postService.getAllCommentsForPost(postId);
         return ResponseEntity.ok(comments);
     }
 
@@ -82,6 +88,17 @@ public class PostController {
         ));
     }
 
+    @GetMapping("/saved")
+    public ResponseEntity<?> getAllSavedPostsOfUser() {
+        List<Map<String, Object>> posts = postService.getAllSavedPostsOfUser();
+        return ResponseEntity.ok(posts);
+    }
+
+    @PostMapping("/me")
+    public ResponseEntity<?> getAllPostsOfUser(@RequestBody Map<String, String> request) {
+        List<Map<String, Object>> posts = postService.getAllPostsOfUser(request.get("username"));
+        return ResponseEntity.ok(posts);
+    }
 
 
 }

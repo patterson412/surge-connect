@@ -11,7 +11,7 @@ import { clearUser } from "../../store/slices/userSlice";
 import CommentDialog from "./CommentDialog";
 import { Separator } from "./ui/separator";
 
-export default function PostCard({ postId, username = "undefined", likeCount, img, commentCount, isLiked = false, isSaved = false, caption, date }) {
+export default function PostCard({ postId, username = "Anonymous", likeCount, img, commentCount, isLiked = false, isSaved = false, caption, date }) {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const { toast } = useToast();
@@ -53,14 +53,14 @@ export default function PostCard({ postId, username = "undefined", likeCount, im
 
     return (
         <div id="PostContainer" className="w-post bg-white flex flex-col">
-            <div id="ImageContainer" className="aspect-square w-full">
+            <div id="ImageContainer" className="relative aspect-square w-full">
                 <img
                     src={img || "/images/placeholderpost.png"}
                     alt="PostImage"
-                    className="h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover"
                 />
             </div>
-            <div id="EngagementContainer" className="w-full flex justify-between items-center p-3 border border-gray-200">
+            <div id="EngagementContainer" className="w-full flex justify-between items-center p-3 border border-gray-200 relative">
                 <div id="LikeAndComment" className="flex gap-4">
                     <div id="LikesContainer" className="flex items-center gap-2" onClick={handleLike}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("lucide lucide-heart cursor-pointer", liked ? "fill-red-500 stroke-red-500" : "fill-none stroke-current hover:text-red-500")}>
@@ -76,17 +76,24 @@ export default function PostCard({ postId, username = "undefined", likeCount, im
                     </div>
                 </div>
 
-                <Link href={`/${username}`} className="font-medium text-sm hover:opacity-50">
+
+                <Link href={`/${username}`} className="font-medium text-sm hover:opacity-50 absolute left-1/2 -translate-x-1/2">
                     <span>{username}</span>
                 </Link>
 
-                <svg onClick={handleSave} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("lucide lucide-bookmark cursor-pointer hover:opacity-50", saved ? "fill-current stroke-current" : "fill-none stroke-current")}>
-                    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-                </svg>
+
+
+                <div className="flex gap-2 justify-center items-center">
+                    <svg onClick={handleSave} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("lucide lucide-bookmark cursor-pointer hover:opacity-50", saved ? "fill-current stroke-current" : "fill-none stroke-current")}>
+                        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+                    </svg>
+                    <span className="italic text-sm">{date}</span>
+                </div>
+
             </div>
 
-            <div id="Caption" className="w-post h-auto">
-                <span className="font-sans text-lg">{caption}</span>
+            <div id="Caption" className="w-post p-3">
+                <span className="font-sans text-sm whitespace-pre-line break-words">{caption}</span>
             </div>
 
             <CommentDialog
@@ -97,7 +104,10 @@ export default function PostCard({ postId, username = "undefined", likeCount, im
                 onCommentAdded={setUpdatedCommentCount}
             />
 
-            <Separator />
+            <div className="pb-4">
+                <Separator />
+            </div>
+
 
         </div>
     );

@@ -1,6 +1,7 @@
 package com.surge.backend.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -87,6 +88,9 @@ public class S3Service {
         }
     }
 
+    @Cacheable(value = "presignedUrls",
+            key = "#objectKey",
+            unless = "#result == null")
     public String generatePreSignedUrl(String objectKey) {
 
         GetObjectRequest objectRequest = GetObjectRequest.builder()

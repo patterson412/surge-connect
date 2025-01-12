@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
@@ -87,6 +88,21 @@ public class MemberService {
                 .build();
 
         userDetailsManager.updateUser(updatedUser);
+    }
+
+    @Transactional
+    public Map<String, String> getUserProfile(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username to get profile data cannot be null");
+        }
+        Member user = memberDao.findById(username.trim()).orElseThrow(() -> new ValidationException("Cannot find user with username: " + username.trim()));
+
+        return Map.of(
+                "profilePic", s3Service.generatePreSignedUrl(user.getFile()),
+                "username", user.getUserId(),
+                "fullName", user.getFirstName() + " " + user.getLastName()
+        );
+
     }
 
 

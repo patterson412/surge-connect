@@ -46,10 +46,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasRole("USER")
                                 .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("USER")
 
-
-
-
-                                // Have to add any other routes
+                                .requestMatchers(HttpMethod.GET, "/api/user/**").hasRole("USER")
 
                                 // Any other request needs authentication
                                 .anyRequest().authenticated()

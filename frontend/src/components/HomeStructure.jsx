@@ -1,8 +1,9 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import PostCard from "./PostCard";
+import PostNew from "./PostNew";
 import { getAllPosts, logout } from "@/lib/services/api";
 import { Skeleton } from "./ui/skeleton";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
@@ -12,12 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, PlusSquare } from "lucide-react";
 import { Separator } from "./ui/separator";
 
 export default function HomeStructure() {
     const [posts, setPosts] = useState([]);
     const [loadingPosts, setLoadingPosts] = useState(false);
+    const [showCreatePost, setShowCreatePost] = useState(false);
     const dispatch = useAppDispatch();
     const router = useRouter();
     const loading = useAppSelector((state) => state.user.loading);
@@ -29,6 +31,7 @@ export default function HomeStructure() {
             dispatch(setLoading(true));
             const response = await getUser();
             dispatch(setUser(response));
+            await fetchPosts();
         } catch (error) {
             console.log(error.response?.data?.message || error.message || "Authentication error");
             toast({
@@ -42,7 +45,6 @@ export default function HomeStructure() {
 
     useEffect(() => {
         validateUser();
-        fetchPosts();
     }, []);
 
     const fetchPosts = async () => {
@@ -62,14 +64,30 @@ export default function HomeStructure() {
     }
 
     const handleLogout = async () => {
-        await logout();
         dispatch(clearUser());
-        router.push("/login");
+        try {
+            await logout();
+        } catch (error) {
+            console.error("Error during logout:", error);
+        } finally {
+            router.push("/login");
+        }
+    };
+
+    if (loading) {
+        return null;
     }
 
-    if (loading || loadingPosts) {
+    if (loadingPosts) {
         return (
-            <div className="flex flex-col h-screen w-screen items-center justify-center">
+            <div className="flex flex-col h-screen w-screen items-center justify-center gap-3">
+                <div className="flex flex-col space-y-3">
+                    <Skeleton className="h-96 w-96 rounded-xl" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-64" />
+                        <Skeleton className="h-4 w-52" />
+                    </div>
+                </div>
                 <div className="flex flex-col space-y-3">
                     <Skeleton className="h-96 w-96 rounded-xl" />
                     <div className="space-y-2">
@@ -126,7 +144,13 @@ export default function HomeStructure() {
                     />
                 </div>
 
-                <div className="w-10" /> {/* Spacer for layout balance */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowCreatePost(true)}
+                >
+                    <PlusSquare className="h-6 w-6" />
+                </Button>
             </div>
 
             {/* Desktop layout */}
@@ -155,26 +179,44 @@ export default function HomeStructure() {
                                 caption={post.caption}
                                 date={post.date}
                             />
-
                         ))
                     ) : (
-                        <span>COULD NOT FETCH POSTS</span>
+                        <div className="w-full flex justify-center items-center">
+                            <span className="italic">{"NO POSTS YET :("}</span>
+                        </div>
                     )}
                 </div>
                 <div className="fixed right-1/2 translate-x-[32rem] top-8">
-                    <div className="relative w-20 h-20 left-3.5">
-                        <Image
-                            src={user?.profilePic || "/images/placeholderpost.png"}
-                            alt="Profile Picture"
-                            fill
-                            className="rounded-full object-cover"
-                        />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <span className="text-gray-600">{user?.fullName}</span>
-                        <Link href={`/${user?.username}`} className="font-semibold hover:underline">
-                            {user?.username}
-                        </Link>
+                    <div className="flex flex-col items-center gap-6">
+                        <div className="relative w-20 h-20">
+                            <img
+                                src={user?.profilePic || "/images/placeholderpost.png"}
+                                alt="Profile Picture"
+                                className="rounded-full object-cover w-full h-full"
+                            />
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                            <span className="text-gray-600">{user?.fullName}</span>
+                            <Link href={`/${user?.username}`} className="font-semibold hover:underline">
+                                {user?.username}
+                            </Link>
+                        </div>
+                        <div className="flex flex-col w-full gap-2">
+                            <Button
+                                onClick={() => setShowCreatePost(true)}
+                                className="w-full flex items-center gap-2"
+                            >
+                                <PlusSquare className="h-5 w-5" />
+                                Create Post
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={handleLogout}
+                                className="w-full"
+                            >
+                                Logout
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -197,9 +239,19 @@ export default function HomeStructure() {
                         />
                     ))
                 ) : (
-                    <span>COULD NOT FETCH POSTS</span>
+                    <div className="w-full flex justify-center items-center">
+                        <span className="italic">{"NO POSTS YET :("}</span>
+                    </div>
                 )}
             </div>
+
+            {/* Create Post Dialog */}
+            <PostNew
+                open={showCreatePost}
+                onOpenChange={setShowCreatePost}
+                fetchPosts={fetchPosts}
+            />
+
         </div>
     );
 }

@@ -6,6 +6,7 @@ const api = axios.create({
     withCredentials: true
 });
 
+
 export const getUser = async () => {
     try {
         const response = await api.get('/api/user/me');
@@ -18,6 +19,17 @@ export const getUser = async () => {
 export const getAllPosts = async () => {
     try {
         const response = await api.get('/api/posts');
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getAllPostsForUser = async (username) => {
+    try {
+        const response = await api.post('/api/posts/me', {
+            username
+        });
         return response.data;
     } catch (error) {
         throw error;
@@ -46,12 +58,10 @@ export const createPost = async (formData) => {
     }
 };
 
-export const updatePost = async (id, formData) => {
+export const updateCaption = async (postId, caption) => {
     try {
-        const response = await api.put(`/api/posts/${id}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+        const response = await api.put(`/api/posts/${postId}`, {
+            caption
         });
         return response.data;
     } catch (error) {
@@ -155,3 +165,14 @@ export const logout = async () => {
         throw error;
     }
 };
+
+export const getUserProfile = async (username) => {
+    try {
+        const response = await api.post('/api/user/user-profile', {
+            username
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}

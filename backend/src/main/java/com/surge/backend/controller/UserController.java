@@ -11,9 +11,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -46,5 +44,11 @@ public class UserController {
                         "profilePic", user.getFile() != null ? s3Service.generatePreSignedUrl(user.getFile()) : ""
                 ));
 
+    }
+
+    @PostMapping("/user-profile")
+    public ResponseEntity<?> getUserProfile(@RequestBody Map<String, String> request) {
+        Map<String, String> response = memberService.getUserProfile(request.get("username"));
+        return ResponseEntity.ok(response);
     }
 }

@@ -53,6 +53,7 @@ export default function Login() {
     
         try {
             const result = await login(username, password);
+            console.log('Login response:', result);
             dispatch(setUser(result));
             toast({
                 title: "Login Successful",

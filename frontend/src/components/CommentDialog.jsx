@@ -109,8 +109,8 @@ const CommentDialog = ({
     const fetchComments = async () => {
         try {
             const commentsObjectList = await getComments(postId);
-            setComments(commentsObjectList);
-            onCommentAdded(commentsObjectList.length);
+            setComments(commentsObjectList.comments);
+            onCommentAdded(commentsObjectList.commentCount);
         } catch (error) {
             console.log(error.response?.data?.message || error.message || "An error occurred");
             toast({

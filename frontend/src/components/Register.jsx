@@ -78,8 +78,6 @@ export default function Register() {
         }
         setSelectedFile(null);
         setPreviewUrl(null);
-        const fileInput = document.getElementById('profilePic');
-        if (fileInput) fileInput.value = '';
     };
 
     const handleSubmit = async (event) => {
@@ -221,7 +219,7 @@ export default function Register() {
                                             </div>
                                         )}
                                         <div className="text-sm text-muted-foreground">
-                                            Recommended: Square image, max 5MB
+                                            Recommended: Square image, max 8MB
                                         </div>
                                     </div>
                                 </div>
